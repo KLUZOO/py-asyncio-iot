@@ -28,30 +28,24 @@ async def main() -> None:
     toilet_id = await toilet_task
 
     # # create a few programs
-    switch_on = [
-        Message(hue_light_id, MessageType.SWITCH_ON),
-        Message(speaker_id, MessageType.SWITCH_ON),
-
-    ]
-    play_song = [
-        Message(speaker_id, MessageType.PLAY_SONG, "Rick Astley - Never Gonna Give You Up"),
-    ]
-    #
-    switch_off_and_flush = [
-        Message(hue_light_id, MessageType.SWITCH_OFF),
-        Message(speaker_id, MessageType.SWITCH_OFF),
-        Message(toilet_id, MessageType.FLUSH),
-
-    ]
-    clean_toilet = [
-        Message(toilet_id, MessageType.CLEAN),
-    ]
-
     await run_sequence(
-        service.run_parallel(switch_on),
-        service.run_parallel(play_song),
-        service.run_parallel(switch_off_and_flush),
-        service.run_parallel(clean_toilet)
+        service.run_parallel([
+            Message(hue_light_id, MessageType.SWITCH_ON),
+            Message(speaker_id, MessageType.SWITCH_ON),
+
+        ]),
+        service.run_parallel([
+            Message(speaker_id, MessageType.PLAY_SONG, "Rick Astley - Never Gonna Give You Up"),
+        ]),
+        service.run_parallel([
+            Message(hue_light_id, MessageType.SWITCH_OFF),
+            Message(speaker_id, MessageType.SWITCH_OFF),
+            Message(toilet_id, MessageType.FLUSH),
+
+        ]),
+        service.run_parallel([
+            Message(toilet_id, MessageType.CLEAN),
+        ])
     )
 
 
