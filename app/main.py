@@ -1,9 +1,15 @@
 import asyncio
 import time
+from typing import Any, Awaitable
 
 from iot.devices import HueLightDevice, SmartSpeakerDevice, SmartToiletDevice
 from iot.message import Message, MessageType
 from iot.service import IOTService
+
+
+async def run_sequence(*functions: Awaitable[Any]) -> None:
+    for function in functions:
+        await function
 
 
 async def main() -> None:
@@ -22,29 +28,31 @@ async def main() -> None:
     toilet_id = await toilet_task
 
     # # create a few programs
-    first = [
+    switch_on = [
         Message(hue_light_id, MessageType.SWITCH_ON),
         Message(speaker_id, MessageType.SWITCH_ON),
 
     ]
-    second = [
+    play_song = [
         Message(speaker_id, MessageType.PLAY_SONG, "Rick Astley - Never Gonna Give You Up"),
     ]
     #
-    third = [
+    switch_off_and_flush = [
         Message(hue_light_id, MessageType.SWITCH_OFF),
         Message(speaker_id, MessageType.SWITCH_OFF),
         Message(toilet_id, MessageType.FLUSH),
 
     ]
-    fourth = [
+    clean_toilet = [
         Message(toilet_id, MessageType.CLEAN),
     ]
 
-    await service.run_parallel(first)
-    await service.run_parallel(second)
-    await service.run_parallel(third)
-    await service.run_parallel(fourth)
+    await run_sequence(
+        service.run_parallel(switch_on),
+        service.run_parallel(play_song),
+        service.run_parallel(switch_off_and_flush),
+        service.run_parallel(clean_toilet)
+    )
 
 
 if __name__ == "__main__":
